@@ -17,7 +17,26 @@ def scan(data: ScanRequest):
 
         headers = response.headers
 
+        # ==========================
+        # Robots.txt Check
+        # ==========================
+        robots = {
+            "found": False,
+            "url": data.url.rstrip("/") + "/robots.txt"
+        }
+
+        try:
+            robots_response = requests.get(robots["url"], timeout=5)
+
+            if robots_response.status_code == 200:
+                robots["found"] = True
+
+        except Exception:
+            pass
+
+        # ==========================
         # SSL Check
+        # ==========================
         ssl_info = {
             "https": data.url.startswith("https://"),
             "certificate": "Unknown"
@@ -36,13 +55,17 @@ def scan(data: ScanRequest):
             except Exception:
                 ssl_info["certificate"] = "Invalid"
 
+        # ==========================
         # Technology Detection
+        # ==========================
         technologies = {
             "server": headers.get("Server", "Unknown"),
             "powered_by": headers.get("X-Powered-By", "Unknown")
         }
 
+        # ==========================
         # Security Headers
+        # ==========================
         security_headers = {
             "Content-Security-Policy": headers.get("Content-Security-Policy", "Missing"),
             "X-Frame-Options": headers.get("X-Frame-Options", "Missing"),
@@ -50,7 +73,9 @@ def scan(data: ScanRequest):
             "Strict-Transport-Security": headers.get("Strict-Transport-Security", "Missing"),
         }
 
+        # ==========================
         # Risk Score
+        # ==========================
         score = 100
 
         for value in security_headers.values():
@@ -64,12 +89,16 @@ def scan(data: ScanRequest):
         else:
             risk = "High"
 
+        # ==========================
+        # Return Response
+        # ==========================
         return {
             "message": "Scan Completed",
             "url": data.url,
             "status_code": response.status_code,
             "server": headers.get("Server", "Unknown"),
             "response_time": round(end - start, 2),
+            "robots": robots,
             "ssl": ssl_info,
             "security_headers": security_headers,
             "technologies": technologies,
