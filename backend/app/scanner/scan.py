@@ -11,6 +11,9 @@ router = APIRouter()
 @router.post("/scan")
 def scan(data: ScanRequest):
     try:
+        # ==========================
+        # Website Request
+        # ==========================
         start = time.time()
         response = requests.get(data.url, timeout=10)
         end = time.time()
@@ -27,10 +30,23 @@ def scan(data: ScanRequest):
 
         try:
             robots_response = requests.get(robots["url"], timeout=5)
-
             if robots_response.status_code == 200:
                 robots["found"] = True
+        except Exception:
+            pass
 
+        # ==========================
+        # Sitemap.xml Check
+        # ==========================
+        sitemap = {
+            "found": False,
+            "url": data.url.rstrip("/") + "/sitemap.xml"
+        }
+
+        try:
+            sitemap_response = requests.get(sitemap["url"], timeout=5)
+            if sitemap_response.status_code == 200:
+                sitemap["found"] = True
         except Exception:
             pass
 
@@ -98,10 +114,14 @@ def scan(data: ScanRequest):
             "status_code": response.status_code,
             "server": headers.get("Server", "Unknown"),
             "response_time": round(end - start, 2),
+
             "robots": robots,
+            "sitemap": sitemap,
             "ssl": ssl_info,
+
             "security_headers": security_headers,
             "technologies": technologies,
+
             "risk_score": score,
             "risk_level": risk
         }
