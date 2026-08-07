@@ -51,6 +51,21 @@ def scan(data: ScanRequest):
             pass
 
         # ==========================
+        # Domain & IP Detection
+        # ==========================
+        hostname = data.url.replace("https://", "").replace("http://", "").split("/")[0]
+
+        try:
+            ip_address = socket.gethostbyname(hostname)
+        except Exception:
+            ip_address = "Unknown"
+
+        domain_info = {
+            "domain": hostname,
+            "ip_address": ip_address
+        }
+
+        # ==========================
         # SSL Check
         # ==========================
         ssl_info = {
@@ -60,8 +75,6 @@ def scan(data: ScanRequest):
 
         if data.url.startswith("https://"):
             try:
-                hostname = data.url.replace("https://", "").split("/")[0]
-
                 context = ssl.create_default_context()
 
                 with socket.create_connection((hostname, 443), timeout=5) as sock:
@@ -117,6 +130,7 @@ def scan(data: ScanRequest):
 
             "robots": robots,
             "sitemap": sitemap,
+            "domain_info": domain_info,
             "ssl": ssl_info,
 
             "security_headers": security_headers,
