@@ -4,6 +4,7 @@ import requests
 import time
 import ssl
 import socket
+from urllib.parse import urlparse
 
 router = APIRouter()
 
@@ -21,40 +22,24 @@ def scan(data: ScanRequest):
         headers = response.headers
 
         # ==========================
-        # Robots.txt Check
+        # URL and Domain Information
         # ==========================
-        robots = {
-            "found": False,
-            "url": data.url.rstrip("/") + "/robots.txt"
-        }
+        parsed_url = urlparse(data.url)
 
-        try:
-            robots_response = requests.get(robots["url"], timeout=5)
-            if robots_response.status_code == 200:
-                robots["found"] = True
-        except Exception:
-            pass
+        hostname = parsed_url.hostname
 
-        # ==========================
-        # Sitemap.xml Check
-        # ==========================
-        sitemap = {
-            "found": False,
-            "url": data.url.rstrip("/") + "/sitemap.xml"
-        }
+        if hostname is None:
+            return {
+                "message": "Invalid URL",
+                "url": data.url
+            }
 
-        try:
-            sitemap_response = requests.get(sitemap["url"], timeout=5)
-            if sitemap_response.status_code == 200:
-                sitemap["found"] = True
-        except Exception:
-            pass
+        # Root URL তৈরি করা হচ্ছে
+        base_url = f"{parsed_url.scheme}://{hostname}"
 
         # ==========================
         # Domain & IP Detection
         # ==========================
-        hostname = data.url.replace("https://", "").replace("http://", "").split("/")[0]
-
         try:
             ip_address = socket.gethostbyname(hostname)
         except Exception:
@@ -66,19 +51,66 @@ def scan(data: ScanRequest):
         }
 
         # ==========================
+        # Robots.txt Check
+        # ==========================
+        robots = {
+            "found": False,
+            "url": base_url + "/robots.txt"
+        }
+
+        try:
+            robots_response = requests.get(
+                robots["url"],
+                timeout=5
+            )
+
+            if robots_response.status_code == 200:
+                robots["found"] = True
+
+        except Exception:
+            pass
+
+        # ==========================
+        # Sitemap.xml Check
+        # ==========================
+        sitemap = {
+            "found": False,
+            "url": base_url + "/sitemap.xml"
+        }
+
+        try:
+            sitemap_response = requests.get(
+                sitemap["url"],
+                timeout=5
+            )
+
+            if sitemap_response.status_code == 200:
+                sitemap["found"] = True
+
+        except Exception:
+            pass
+
+        # ==========================
         # SSL Check
         # ==========================
         ssl_info = {
-            "https": data.url.startswith("https://"),
+            "https": parsed_url.scheme == "https",
             "certificate": "Unknown"
         }
 
-        if data.url.startswith("https://"):
+        if parsed_url.scheme == "https":
             try:
                 context = ssl.create_default_context()
 
-                with socket.create_connection((hostname, 443), timeout=5) as sock:
-                    with context.wrap_socket(sock, server_hostname=hostname):
+                with socket.create_connection(
+                    (hostname, 443),
+                    timeout=5
+                ) as sock:
+
+                    with context.wrap_socket(
+                        sock,
+                        server_hostname=hostname
+                    ):
                         ssl_info["certificate"] = "Valid"
 
             except Exception:
@@ -88,18 +120,36 @@ def scan(data: ScanRequest):
         # Technology Detection
         # ==========================
         technologies = {
-            "server": headers.get("Server", "Unknown"),
-            "powered_by": headers.get("X-Powered-By", "Unknown")
+            "server": headers.get(
+                "Server",
+                "Unknown"
+            ),
+            "powered_by": headers.get(
+                "X-Powered-By",
+                "Unknown"
+            )
         }
 
         # ==========================
         # Security Headers
         # ==========================
         security_headers = {
-            "Content-Security-Policy": headers.get("Content-Security-Policy", "Missing"),
-            "X-Frame-Options": headers.get("X-Frame-Options", "Missing"),
-            "X-Content-Type-Options": headers.get("X-Content-Type-Options", "Missing"),
-            "Strict-Transport-Security": headers.get("Strict-Transport-Security", "Missing"),
+            "Content-Security-Policy": headers.get(
+                "Content-Security-Policy",
+                "Missing"
+            ),
+            "X-Frame-Options": headers.get(
+                "X-Frame-Options",
+                "Missing"
+            ),
+            "X-Content-Type-Options": headers.get(
+                "X-Content-Type-Options",
+                "Missing"
+            ),
+            "Strict-Transport-Security": headers.get(
+                "Strict-Transport-Security",
+                "Missing"
+            )
         }
 
         # ==========================
@@ -113,20 +163,28 @@ def scan(data: ScanRequest):
 
         if score >= 75:
             risk = "Low"
+
         elif score >= 50:
             risk = "Medium"
+
         else:
             risk = "High"
 
         # ==========================
-        # Return Response
+        # Return Scan Result
         # ==========================
         return {
             "message": "Scan Completed",
             "url": data.url,
             "status_code": response.status_code,
-            "server": headers.get("Server", "Unknown"),
-            "response_time": round(end - start, 2),
+            "server": headers.get(
+                "Server",
+                "Unknown"
+            ),
+            "response_time": round(
+                end - start,
+                2
+            ),
 
             "robots": robots,
             "sitemap": sitemap,
@@ -141,6 +199,7 @@ def scan(data: ScanRequest):
         }
 
     except requests.exceptions.RequestException as e:
+
         return {
             "message": "Website Unreachable",
             "url": data.url,
