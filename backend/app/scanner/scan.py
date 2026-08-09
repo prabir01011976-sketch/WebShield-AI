@@ -34,7 +34,6 @@ def scan(data: ScanRequest):
                 "url": data.url
             }
 
-        # Root URL তৈরি করা হচ্ছে
         base_url = f"{parsed_url.scheme}://{hostname}"
 
         # ==========================
@@ -153,6 +152,26 @@ def scan(data: ScanRequest):
         }
 
         # ==========================
+        # Cookie Security Check
+        # ==========================
+        cookies = []
+
+        for cookie in response.cookies:
+            cookies.append({
+                "name": cookie.name,
+                "secure": cookie.secure,
+                "httponly": "HttpOnly" in cookie._rest,
+                "samesite": cookie.get_nonstandard_attr(
+                    "SameSite"
+                )
+            })
+
+        cookie_security = {
+            "cookies_found": len(cookies),
+            "cookies": cookies
+        }
+
+        # ==========================
         # Risk Score
         # ==========================
         score = 100
@@ -163,10 +182,8 @@ def scan(data: ScanRequest):
 
         if score >= 75:
             risk = "Low"
-
         elif score >= 50:
             risk = "Medium"
-
         else:
             risk = "High"
 
@@ -192,6 +209,7 @@ def scan(data: ScanRequest):
             "ssl": ssl_info,
 
             "security_headers": security_headers,
+            "cookie_security": cookie_security,
             "technologies": technologies,
 
             "risk_score": score,
@@ -199,7 +217,6 @@ def scan(data: ScanRequest):
         }
 
     except requests.exceptions.RequestException as e:
-
         return {
             "message": "Website Unreachable",
             "url": data.url,
