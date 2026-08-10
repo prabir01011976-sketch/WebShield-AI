@@ -16,7 +16,12 @@ def scan(data: ScanRequest):
         # Website Request
         # ==========================
         start = time.time()
-        response = requests.get(data.url, timeout=10)
+
+        response = requests.get(
+            data.url,
+            timeout=10
+        )
+
         end = time.time()
 
         headers = response.headers
@@ -34,6 +39,7 @@ def scan(data: ScanRequest):
                 "url": data.url
             }
 
+        # Root URL
         base_url = f"{parsed_url.scheme}://{hostname}"
 
         # ==========================
@@ -41,6 +47,7 @@ def scan(data: ScanRequest):
         # ==========================
         try:
             ip_address = socket.gethostbyname(hostname)
+
         except Exception:
             ip_address = "Unknown"
 
@@ -156,16 +163,25 @@ def scan(data: ScanRequest):
         # ==========================
         cookies = []
 
-        for cookie in response.cookies:
-            cookies.append({
-                "name": cookie.name,
-                "secure": cookie.secure,
-                "httponly": "HttpOnly" in cookie._rest,
-                "samesite": cookie.get_nonstandard_attr(
-                    "SameSite"
-                )
-            })
+        set_cookie_headers = response.raw.headers.getlist(
+            "Set-Cookie"
+        )
 
+        for cookie_header in set_cookie_headers:
+            cookie_name = cookie_header.split("=", 1)[0].strip()
+
+            cookie_info = {
+                "name": cookie_name,
+                "secure": "Secure" in cookie_header,
+                "httponly": "HttpOnly" in cookie_header,
+                "samesite": "SameSite" in cookie_header
+            }
+
+            cookies.append(cookie_info)
+
+        # ==========================
+        # Cookie Security Summary
+        # ==========================
         cookie_security = {
             "cookies_found": len(cookies),
             "cookies": cookies
@@ -176,14 +192,35 @@ def scan(data: ScanRequest):
         # ==========================
         score = 100
 
+        # Missing security headers
         for value in security_headers.values():
             if value == "Missing":
                 score -= 25
 
+        # Cookie security
+        for cookie in cookies:
+
+            if not cookie["secure"]:
+                score -= 5
+
+            if not cookie["httponly"]:
+                score -= 5
+
+            if not cookie["samesite"]:
+                score -= 5
+
+        # Keep score between 0 and 100
+        score = max(0, min(score, 100))
+
+        # ==========================
+        # Risk Level
+        # ==========================
         if score >= 75:
             risk = "Low"
+
         elif score >= 50:
             risk = "Medium"
+
         else:
             risk = "High"
 
@@ -209,7 +246,9 @@ def scan(data: ScanRequest):
             "ssl": ssl_info,
 
             "security_headers": security_headers,
+
             "cookie_security": cookie_security,
+
             "technologies": technologies,
 
             "risk_score": score,
@@ -217,6 +256,7 @@ def scan(data: ScanRequest):
         }
 
     except requests.exceptions.RequestException as e:
+
         return {
             "message": "Website Unreachable",
             "url": data.url,
