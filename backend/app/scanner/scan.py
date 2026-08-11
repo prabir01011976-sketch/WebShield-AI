@@ -168,7 +168,10 @@ def scan(data: ScanRequest):
         )
 
         for cookie_header in set_cookie_headers:
-            cookie_name = cookie_header.split("=", 1)[0].strip()
+            cookie_name = cookie_header.split(
+                "=",
+                1
+            )[0].strip()
 
             cookie_info = {
                 "name": cookie_name,
@@ -179,9 +182,6 @@ def scan(data: ScanRequest):
 
             cookies.append(cookie_info)
 
-        # ==========================
-        # Cookie Security Summary
-        # ==========================
         cookie_security = {
             "cookies_found": len(cookies),
             "cookies": cookies
@@ -192,12 +192,20 @@ def scan(data: ScanRequest):
         # ==========================
         score = 100
 
-        # Missing security headers
-        for value in security_headers.values():
-            if value == "Missing":
-                score -= 25
+        # Security Header Penalties
+        if security_headers["Content-Security-Policy"] == "Missing":
+            score -= 15
 
-        # Cookie security
+        if security_headers["X-Frame-Options"] == "Missing":
+            score -= 10
+
+        if security_headers["X-Content-Type-Options"] == "Missing":
+            score -= 10
+
+        if security_headers["Strict-Transport-Security"] == "Missing":
+            score -= 15
+
+        # Cookie Penalties
         for cookie in cookies:
 
             if not cookie["secure"]:
@@ -210,12 +218,15 @@ def scan(data: ScanRequest):
                 score -= 5
 
         # Keep score between 0 and 100
-        score = max(0, min(score, 100))
+        score = max(
+            0,
+            min(score, 100)
+        )
 
         # ==========================
         # Risk Level
         # ==========================
-        if score >= 75:
+        if score >= 80:
             risk = "Low"
 
         elif score >= 50:
@@ -246,7 +257,6 @@ def scan(data: ScanRequest):
             "ssl": ssl_info,
 
             "security_headers": security_headers,
-
             "cookie_security": cookie_security,
 
             "technologies": technologies,
