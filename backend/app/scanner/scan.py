@@ -39,7 +39,6 @@ def scan(data: ScanRequest):
                 "url": data.url
             }
 
-        # Root URL
         base_url = f"{parsed_url.scheme}://{hostname}"
 
         # ==========================
@@ -159,6 +158,59 @@ def scan(data: ScanRequest):
         }
 
         # ==========================
+        # Security Findings
+        # ==========================
+        findings = []
+
+        if security_headers["Content-Security-Policy"] == "Missing":
+            findings.append({
+                "type": "Security Header",
+                "name": "Content-Security-Policy",
+                "severity": "Medium",
+                "reason": "Content Security Policy is not configured.",
+                "recommendation": (
+                    "Add a suitable Content-Security-Policy "
+                    "header to control allowed content sources."
+                )
+            })
+
+        if security_headers["X-Frame-Options"] == "Missing":
+            findings.append({
+                "type": "Security Header",
+                "name": "X-Frame-Options",
+                "severity": "Medium",
+                "reason": "X-Frame-Options header is missing.",
+                "recommendation": (
+                    "Configure X-Frame-Options to reduce "
+                    "clickjacking risk."
+                )
+            })
+
+        if security_headers["X-Content-Type-Options"] == "Missing":
+            findings.append({
+                "type": "Security Header",
+                "name": "X-Content-Type-Options",
+                "severity": "Low",
+                "reason": "X-Content-Type-Options header is missing.",
+                "recommendation": (
+                    "Add X-Content-Type-Options: nosniff "
+                    "to reduce MIME-type sniffing."
+                )
+            })
+
+        if security_headers["Strict-Transport-Security"] == "Missing":
+            findings.append({
+                "type": "Security Header",
+                "name": "Strict-Transport-Security",
+                "severity": "Medium",
+                "reason": "HSTS header is missing.",
+                "recommendation": (
+                    "Configure Strict-Transport-Security "
+                    "when the website is fully HTTPS."
+                )
+            })
+
+        # ==========================
         # Cookie Security Check
         # ==========================
         cookies = []
@@ -168,6 +220,7 @@ def scan(data: ScanRequest):
         )
 
         for cookie_header in set_cookie_headers:
+
             cookie_name = cookie_header.split(
                 "=",
                 1
@@ -181,6 +234,42 @@ def scan(data: ScanRequest):
             }
 
             cookies.append(cookie_info)
+
+            if not cookie_info["secure"]:
+                findings.append({
+                    "type": "Cookie Security",
+                    "name": cookie_name,
+                    "severity": "Medium",
+                    "reason": "Cookie does not have the Secure attribute.",
+                    "recommendation": (
+                        "Use the Secure attribute for cookies "
+                        "that should only be transmitted over HTTPS."
+                    )
+                })
+
+            if not cookie_info["httponly"]:
+                findings.append({
+                    "type": "Cookie Security",
+                    "name": cookie_name,
+                    "severity": "Medium",
+                    "reason": "Cookie does not have the HttpOnly attribute.",
+                    "recommendation": (
+                        "Use HttpOnly for cookies that do not "
+                        "need to be accessed by client-side JavaScript."
+                    )
+                })
+
+            if not cookie_info["samesite"]:
+                findings.append({
+                    "type": "Cookie Security",
+                    "name": cookie_name,
+                    "severity": "Low",
+                    "reason": "Cookie does not specify SameSite.",
+                    "recommendation": (
+                        "Consider using an appropriate SameSite "
+                        "policy for the cookie."
+                    )
+                })
 
         cookie_security = {
             "cookies_found": len(cookies),
@@ -260,6 +349,8 @@ def scan(data: ScanRequest):
             "cookie_security": cookie_security,
 
             "technologies": technologies,
+
+            "findings": findings,
 
             "risk_score": score,
             "risk_level": risk
