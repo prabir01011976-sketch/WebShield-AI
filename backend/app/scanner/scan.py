@@ -79,6 +79,23 @@ def scan(data: ScanRequest):
         headers = response.headers
 
         # ==========================
+        # Response Information
+        # ==========================
+        redirect_info = {
+            "redirected": len(response.history) > 0,
+            "redirect_count": len(response.history),
+            "final_url": response.url
+        }
+
+        # ==========================
+        # Response Headers
+        # ==========================
+        response_headers = {}
+
+        for header_name, header_value in headers.items():
+            response_headers[header_name] = header_value
+
+        # ==========================
         # Domain & IP Detection
         # ==========================
         try:
@@ -336,10 +353,18 @@ def scan(data: ScanRequest):
 
                     cookie_info = {
                         "name": cookie_name,
-                        "secure": "; secure" in cookie_lower
-                        or cookie_lower.endswith(";secure"),
-                        "httponly": "httponly" in cookie_lower,
-                        "samesite": "samesite=" in cookie_lower
+                        "secure": (
+                            "secure" in [
+                                part.strip().lower()
+                                for part in cookie_header.split(";")
+                            ]
+                        ),
+                        "httponly": (
+                            "httponly" in cookie_lower
+                        ),
+                        "samesite": (
+                            "samesite=" in cookie_lower
+                        )
                     }
 
                     cookies.append(cookie_info)
@@ -500,6 +525,8 @@ def scan(data: ScanRequest):
                 end - start,
                 2
             ),
+            "redirect_info": redirect_info,
+            "response_headers": response_headers,
             "robots": robots,
             "sitemap": sitemap,
             "domain_info": domain_info,
