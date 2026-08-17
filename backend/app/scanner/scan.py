@@ -218,7 +218,9 @@ def generate_findings(
             "type": "Security Header",
             "name": "Content-Security-Policy",
             "severity": "Medium",
-            "reason": "Content Security Policy header is missing.",
+            "reason": (
+                "Content Security Policy header is missing."
+            ),
             "recommendation": (
                 "Add a suitable Content-Security-Policy header "
                 "to control allowed content sources."
@@ -235,7 +237,9 @@ def generate_findings(
             "type": "Security Header",
             "name": "X-Content-Type-Options",
             "severity": "Low",
-            "reason": "X-Content-Type-Options header is missing.",
+            "reason": (
+                "X-Content-Type-Options header is missing."
+            ),
             "recommendation": (
                 "Add X-Content-Type-Options: nosniff "
                 "to reduce MIME-type sniffing."
@@ -274,11 +278,14 @@ def generate_findings(
                 "type": "SSL",
                 "name": "SSL Certificate",
                 "severity": "High",
-                "reason": "The SSL certificate could not be validated.",
+                "reason": (
+                    "The SSL certificate could not be validated."
+                ),
                 "recommendation": (
                     "Install a valid certificate and ensure "
                     "the certificate chain is correctly configured."
                 )
+
             })
 
     else:
@@ -287,7 +294,9 @@ def generate_findings(
             "type": "Transport Security",
             "name": "HTTPS",
             "severity": "High",
-            "reason": "The scanned URL does not use HTTPS.",
+            "reason": (
+                "The scanned URL does not use HTTPS."
+            ),
             "recommendation": (
                 "Use HTTPS with a valid TLS certificate "
                 "to protect data in transit."
@@ -427,6 +436,10 @@ def calculate_risk_score(findings):
         min(100, score)
     )
 
+    # --------------------------------------------------------
+    # Risk Level Classification
+    # --------------------------------------------------------
+
     if score >= 80:
         risk_level = "Low"
 
@@ -440,6 +453,60 @@ def calculate_risk_score(findings):
         risk_level = "Critical"
 
     return score, risk_level
+
+
+# ============================================================
+# Helper: Risk Level Explanation
+# ============================================================
+
+def get_risk_explanation(risk_level):
+
+    explanations = {
+
+        "Low": (
+            "The website shows a relatively low level of "
+            "security risk based on the checks performed. "
+            "Only minor security improvements may be required."
+        ),
+
+        "Medium": (
+            "The website has some security weaknesses that "
+            "should be reviewed and improved to strengthen "
+            "its overall security posture."
+        ),
+
+        "High": (
+            "The website has multiple security weaknesses "
+            "that should be addressed. Security improvements "
+            "are recommended before considering the website "
+            "fully protected."
+        ),
+
+        "Critical": (
+            "The scan identified serious security weaknesses "
+            "that require immediate attention. The website "
+            "should be reviewed and secured as soon as possible."
+        )
+    }
+
+    return explanations.get(
+        risk_level,
+        "Risk level could not be determined."
+    )
+
+
+# ============================================================
+# Helper: Risk Score Guide
+# ============================================================
+
+def get_risk_score_guide():
+
+    return {
+        "80-100": "Low",
+        "60-79": "Medium",
+        "40-59": "High",
+        "0-39": "Critical"
+    }
 
 
 # ============================================================
@@ -630,6 +697,20 @@ def scan(data: ScanRequest):
         )
 
         # ====================================================
+        # Risk Explanation
+        # ====================================================
+
+        risk_explanation = get_risk_explanation(
+            risk_level
+        )
+
+        # ====================================================
+        # Risk Score Guide
+        # ====================================================
+
+        risk_score_guide = get_risk_score_guide()
+
+        # ====================================================
         # Warnings
         # ====================================================
 
@@ -701,6 +782,21 @@ def scan(data: ScanRequest):
             "technologies": technologies,
 
             "findings": findings,
+
+            # =================================================
+            # Professional Risk Assessment
+            # =================================================
+
+            "risk_assessment": {
+
+                "score": risk_score,
+
+                "level": risk_level,
+
+                "description": risk_explanation,
+
+                "score_guide": risk_score_guide
+            },
 
             "risk_score": risk_score,
 
