@@ -1,0 +1,1031 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <meta
+        name="description"
+        content="WebShield-AI professional web security scanner"
+    >
+
+    <title>WebShield-AI | Security Scanner</title>
+
+    <link
+        rel="stylesheet"
+        href="style.css"
+    >
+</head>
+
+<body>
+
+    <!-- =========================================================
+         APPLICATION HEADER
+    ========================================================== -->
+
+    <header class="topbar">
+
+        <div class="brand">
+
+            <div class="brand-icon">
+                WS
+            </div>
+
+            <div class="brand-text">
+
+                <h1>WebShield-AI</h1>
+
+                <span>
+                    Web Security Intelligence Platform
+                </span>
+
+            </div>
+
+        </div>
+
+        <div class="system-status">
+
+            <span class="status-dot"></span>
+
+            <span>
+                Scanner Online
+            </span>
+
+        </div>
+
+    </header>
+
+
+    <!-- =========================================================
+         MAIN APPLICATION
+    ========================================================== -->
+
+    <main class="container">
+
+
+        <!-- =====================================================
+             HERO SECTION
+        ====================================================== -->
+
+        <section class="hero-section">
+
+            <div class="hero-content">
+
+                <span class="hero-badge">
+                    AI-POWERED SECURITY ANALYSIS
+                </span>
+
+                <h2>
+                    Scan. Analyze. Protect.
+                </h2>
+
+                <p>
+                    Perform a professional security assessment
+                    of your web application and identify
+                    potential security weaknesses.
+                </p>
+
+            </div>
+
+        </section>
+
+
+        <!-- =====================================================
+             SCAN PANEL
+        ====================================================== -->
+
+        <section class="scan-panel">
+
+            <div class="panel-heading">
+
+                <div>
+
+                    <span class="section-label">
+                        SECURITY SCANNER
+                    </span>
+
+                    <h3>
+                        Start a New Security Scan
+                    </h3>
+
+                    <p>
+                        Enter the authorized website URL you
+                        want WebShield-AI to analyze.
+                    </p>
+
+                </div>
+
+                <div class="scan-icon">
+                    ⛨
+                </div>
+
+            </div>
+
+
+            <div class="scan-form">
+
+                <div class="input-wrapper">
+
+                    <label for="urlInput">
+                        Target URL
+                    </label>
+
+                    <input
+                        type="url"
+                        id="urlInput"
+                        placeholder="https://example.com"
+                        autocomplete="off"
+                    >
+
+                </div>
+
+
+                <button
+                    type="button"
+                    id="scanButton"
+                    class="scan-button"
+                >
+
+                    <span id="scanButtonText">
+                        Start Security Scan
+                    </span>
+
+                    <span
+                        id="scanLoader"
+                        class="button-loader hidden"
+                    ></span>
+
+                </button>
+
+            </div>
+
+
+            <div
+                id="scanMessage"
+                class="scan-message hidden"
+            ></div>
+
+        </section>
+
+
+        <!-- =====================================================
+             SCAN LOADING STATE
+        ====================================================== -->
+
+        <section
+            id="loadingSection"
+            class="loading-section hidden"
+        >
+
+            <div class="loading-card">
+
+                <div class="scanner-animation">
+
+                    <div class="scanner-ring"></div>
+
+                    <div class="scanner-core">
+                        WS
+                    </div>
+
+                </div>
+
+                <h3>
+                    Security Analysis in Progress
+                </h3>
+
+                <p>
+                    WebShield-AI is analyzing the target,
+                    security headers, SSL configuration,
+                    cookies and other security indicators.
+                </p>
+
+                <div class="loading-progress">
+
+                    <div
+                        id="loadingProgressBar"
+                        class="loading-progress-bar"
+                    ></div>
+
+                </div>
+
+                <span id="loadingStatus">
+                    Initializing security scanner...
+                </span>
+
+            </div>
+
+        </section>
+
+
+        <!-- =====================================================
+             RESULT DASHBOARD
+        ====================================================== -->
+
+        <section
+            id="resultsSection"
+            class="results-section hidden"
+        >
+
+
+            <!-- =================================================
+                 RESULT HEADER
+            ================================================== -->
+
+            <div class="results-header">
+
+                <div>
+
+                    <span class="section-label">
+                        SECURITY ASSESSMENT
+                    </span>
+
+                    <h2>
+                        Scan Results
+                    </h2>
+
+                    <p id="resultTarget">
+                        Target:
+                    </p>
+
+                </div>
+
+                <div
+                    id="scanStatusBadge"
+                    class="result-status"
+                >
+                    Completed
+                </div>
+
+            </div>
+
+
+            <!-- =================================================
+                 RISK OVERVIEW
+            ================================================== -->
+
+            <div class="risk-overview">
+
+
+                <!-- SCORE CARD -->
+
+                <div class="risk-score-card">
+
+                    <div class="card-title-row">
+
+                        <span>
+                            SECURITY SCORE
+                        </span>
+
+                        <span class="info-icon">
+                            i
+                        </span>
+
+                    </div>
+
+
+                    <div class="score-display">
+
+                        <div
+                            id="riskScore"
+                            class="risk-score"
+                        >
+                            --
+                        </div>
+
+                        <span>
+                            / 100
+                        </span>
+
+                    </div>
+
+
+                    <div class="score-bar">
+
+                        <div
+                            id="scoreBar"
+                            class="score-bar-fill"
+                        ></div>
+
+                    </div>
+
+
+                    <div class="score-description">
+
+                        <span>
+                            Current Risk Level
+                        </span>
+
+                        <strong id="riskLevel">
+                            --
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+                <!-- FINDINGS SUMMARY -->
+
+                <div class="summary-card">
+
+                    <div class="card-title-row">
+
+                        <span>
+                            FINDINGS SUMMARY
+                        </span>
+
+                    </div>
+
+
+                    <div class="finding-summary-grid">
+
+                        <div class="summary-item critical">
+
+                            <span
+                                id="criticalCount"
+                                class="summary-number"
+                            >
+                                0
+                            </span>
+
+                            <span>
+                                Critical
+                            </span>
+
+                        </div>
+
+
+                        <div class="summary-item high">
+
+                            <span
+                                id="highCount"
+                                class="summary-number"
+                            >
+                                0
+                            </span>
+
+                            <span>
+                                High
+                            </span>
+
+                        </div>
+
+
+                        <div class="summary-item medium">
+
+                            <span
+                                id="mediumCount"
+                                class="summary-number"
+                            >
+                                0
+                            </span>
+
+                            <span>
+                                Medium
+                            </span>
+
+                        </div>
+
+
+                        <div class="summary-item low">
+
+                            <span
+                                id="lowCount"
+                                class="summary-number"
+                            >
+                                0
+                            </span>
+
+                            <span>
+                                Low
+                            </span>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- SCAN INFORMATION -->
+
+                <div class="summary-card">
+
+                    <div class="card-title-row">
+
+                        <span>
+                            SCAN INFORMATION
+                        </span>
+
+                    </div>
+
+
+                    <div class="information-list">
+
+                        <div>
+
+                            <span>
+                                HTTP Status
+                            </span>
+
+                            <strong id="statusCode">
+                                --
+                            </strong>
+
+                        </div>
+
+
+                        <div>
+
+                            <span>
+                                Response Time
+                            </span>
+
+                            <strong id="responseTime">
+                                --
+                            </strong>
+
+                        </div>
+
+
+                        <div>
+
+                            <span>
+                                HTTPS
+                            </span>
+
+                            <strong id="httpsStatus">
+                                --
+                            </strong>
+
+                        </div>
+
+
+                        <div>
+
+                            <span>
+                                SSL Certificate
+                            </span>
+
+                            <strong id="sslStatus">
+                                --
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- =================================================
+                 RISK ASSESSMENT
+            ================================================== -->
+
+            <div class="dashboard-card">
+
+                <div class="dashboard-card-header">
+
+                    <div>
+
+                        <span class="section-label">
+                            RISK ASSESSMENT
+                        </span>
+
+                        <h3>
+                            Security Risk Analysis
+                        </h3>
+
+                    </div>
+
+                    <div
+                        id="riskLevelLarge"
+                        class="risk-badge"
+                    >
+                        --
+                    </div>
+
+                </div>
+
+
+                <div
+                    id="riskDescription"
+                    class="risk-description"
+                >
+                    Security assessment information will
+                    appear here after scanning.
+                </div>
+
+
+                <div class="score-guide">
+
+                    <div class="guide-title">
+                        Risk Score Guide
+                    </div>
+
+
+                    <div class="guide-items">
+
+                        <div class="guide-item">
+
+                            <span class="guide-range">
+                                80–100
+                            </span>
+
+                            <span>
+                                Low
+                            </span>
+
+                        </div>
+
+
+                        <div class="guide-item">
+
+                            <span class="guide-range">
+                                60–79
+                            </span>
+
+                            <span>
+                                Medium
+                            </span>
+
+                        </div>
+
+
+                        <div class="guide-item">
+
+                            <span class="guide-range">
+                                40–59
+                            </span>
+
+                            <span>
+                                High
+                            </span>
+
+                        </div>
+
+
+                        <div class="guide-item">
+
+                            <span class="guide-range">
+                                0–39
+                            </span>
+
+                            <span>
+                                Critical
+                            </span>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- =================================================
+                 SECURITY FINDINGS
+            ================================================== -->
+
+            <div class="dashboard-card">
+
+                <div class="dashboard-card-header">
+
+                    <div>
+
+                        <span class="section-label">
+                            SECURITY FINDINGS
+                        </span>
+
+                        <h3>
+                            Detected Security Issues
+                        </h3>
+
+                    </div>
+
+                    <span
+                        id="findingCount"
+                        class="finding-count"
+                    >
+                        0 Findings
+                    </span>
+
+                </div>
+
+
+                <div
+                    id="findingsContainer"
+                    class="findings-container"
+                >
+
+                    <div class="empty-findings">
+                        No findings available.
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- =================================================
+                 SECURITY HEADERS
+            ================================================== -->
+
+            <div class="dashboard-card">
+
+                <div class="dashboard-card-header">
+
+                    <div>
+
+                        <span class="section-label">
+                            SECURITY HEADERS
+                        </span>
+
+                        <h3>
+                            HTTP Security Header Analysis
+                        </h3>
+
+                    </div>
+
+                </div>
+
+
+                <div
+                    id="headersContainer"
+                    class="headers-grid"
+                ></div>
+
+            </div>
+
+
+            <!-- =================================================
+                 INFRASTRUCTURE INFORMATION
+            ================================================== -->
+
+            <div class="information-grid">
+
+
+                <!-- SSL CARD -->
+
+                <div class="dashboard-card small-card">
+
+                    <div class="dashboard-card-header">
+
+                        <div>
+
+                            <span class="section-label">
+                                TRANSPORT SECURITY
+                            </span>
+
+                            <h3>
+                                SSL / HTTPS
+                            </h3>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="detail-list">
+
+                        <div>
+
+                            <span>
+                                HTTPS Enabled
+                            </span>
+
+                            <strong id="detailHttps">
+                                --
+                            </strong>
+
+                        </div>
+
+
+                        <div>
+
+                            <span>
+                                Certificate
+                            </span>
+
+                            <strong id="detailCertificate">
+                                --
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- DOMAIN CARD -->
+
+                <div class="dashboard-card small-card">
+
+                    <div class="dashboard-card-header">
+
+                        <div>
+
+                            <span class="section-label">
+                                DOMAIN INFORMATION
+                            </span>
+
+                            <h3>
+                                Network Identity
+                            </h3>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="detail-list">
+
+                        <div>
+
+                            <span>
+                                Domain
+                            </span>
+
+                            <strong id="domainName">
+                                --
+                            </strong>
+
+                        </div>
+
+
+                        <div>
+
+                            <span>
+                                IP Address
+                            </span>
+
+                            <strong id="ipAddress">
+                                --
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- SERVER CARD -->
+
+                <div class="dashboard-card small-card">
+
+                    <div class="dashboard-card-header">
+
+                        <div>
+
+                            <span class="section-label">
+                                TECHNOLOGY
+                            </span>
+
+                            <h3>
+                                Server Information
+                            </h3>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="detail-list">
+
+                        <div>
+
+                            <span>
+                                Server
+                            </span>
+
+                            <strong id="serverName">
+                                --
+                            </strong>
+
+                        </div>
+
+
+                        <div>
+
+                            <span>
+                                Powered By
+                            </span>
+
+                            <strong id="poweredBy">
+                                --
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- SITE DISCOVERY CARD -->
+
+                <div class="dashboard-card small-card">
+
+                    <div class="dashboard-card-header">
+
+                        <div>
+
+                            <span class="section-label">
+                                SITE DISCOVERY
+                            </span>
+
+                            <h3>
+                                Web Resources
+                            </h3>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="detail-list">
+
+                        <div>
+
+                            <span>
+                                Robots.txt
+                            </span>
+
+                            <strong id="robotsStatus">
+                                --
+                            </strong>
+
+                        </div>
+
+
+                        <div>
+
+                            <span>
+                                Sitemap.xml
+                            </span>
+
+                            <strong id="sitemapStatus">
+                                --
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- =================================================
+                 COOKIE SECURITY
+            ================================================== -->
+
+            <div class="dashboard-card">
+
+                <div class="dashboard-card-header">
+
+                    <div>
+
+                        <span class="section-label">
+                            COOKIE SECURITY
+                        </span>
+
+                        <h3>
+                            Cookie Configuration Analysis
+                        </h3>
+
+                    </div>
+
+                    <span
+                        id="cookieCount"
+                        class="finding-count"
+                    >
+                        0 Cookies
+                    </span>
+
+                </div>
+
+
+                <div
+                    id="cookiesContainer"
+                    class="cookies-container"
+                >
+
+                    <div class="empty-findings">
+                        No cookies detected.
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- =================================================
+                 RESPONSE HEADERS
+            ================================================== -->
+
+            <div class="dashboard-card">
+
+                <div class="dashboard-card-header">
+
+                    <div>
+
+                        <span class="section-label">
+                            RAW RESPONSE
+                        </span>
+
+                        <h3>
+                            Response Headers
+                        </h3>
+
+                    </div>
+
+                </div>
+
+
+                <div class="response-header-wrapper">
+
+                    <pre
+                        id="responseHeaders"
+                        class="response-headers"
+                    >No response headers available.</pre>
+
+                </div>
+
+            </div>
+
+
+            <!-- =================================================
+                 SCAN AGAIN
+            ================================================== -->
+
+            <div class="scan-again-section">
+
+                <button
+                    type="button"
+                    id="scanAgainButton"
+                    class="secondary-button"
+                >
+                    Run Another Security Scan
+                </button>
+
+            </div>
+
+
+        </section>
+
+
+        <!-- =====================================================
+             FOOTER
+        ====================================================== -->
+
+        <footer class="footer">
+
+            <div>
+
+                <strong>
+                    WebShield-AI
+                </strong>
+
+                <span>
+                    Professional Web Security Analysis Platform
+                </span>
+
+            </div>
+
+
+            <div class="footer-right">
+
+                <span>
+                    Authorized security testing only
+                </span>
+
+                <span>
+                    v1.0.0
+                </span>
+
+            </div>
+
+        </footer>
+
+    </main>
+
+
+    <!-- =========================================================
+         JAVASCRIPT
+    ========================================================== -->
+
+    <script src="app.js"></script>
+
+</body>
+</html>
